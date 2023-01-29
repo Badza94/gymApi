@@ -12,9 +12,9 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
-import { GetUserProp } from 'src/auth/decorator';
-import { AccessTokenGuard } from 'src/auth/guard';
+import { Order } from '../enums';
+import { GetUserProp } from '../auth/decorator';
+import { AccessTokenGuard } from '../auth/guard';
 import { BookmarkService } from './bookmark.service';
 import { CreateBookmarkDto, EditBookmarkDto } from './dto';
 
@@ -27,7 +27,7 @@ export class BookmarkController {
     @GetUserProp('id') userId: number,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
-    @Query('order') order?: 'asc' | 'desc',
+    @Query('order') order?: Order.ASC | Order.DESC,
   ) {
     return this.bookmarkService.getBookmarks(userId, {
       page: Number(page),

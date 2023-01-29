@@ -160,7 +160,8 @@ describe('App e2e', () => {
           .stores('bookmarkId', 'id');
       });
     });
-    describe('Get Bookmarks', () => {
+
+    describe('Get Bookmarks with NO params', () => {
       it('should Get bookmarks', () => {
         return pactum
           .spec()
@@ -172,6 +173,41 @@ describe('App e2e', () => {
           .expectJsonLength(1);
       });
     });
+
+    describe('Create Multiple Bookmarks', () => {
+      it('should do a POST request 10 times', async () => {
+        for (let i = 1; i <= 10; i++) {
+          await pactum
+            .spec()
+            .post('/bookmarks')
+            .withHeaders({
+              Authorization: 'Bearer $S{userAt}',
+            })
+            .withBody({
+              title: i + ' Bookmark',
+              link: i.toString(),
+            })
+            .expectStatus(201);
+        }
+      });
+    });
+
+    describe('Get Bookmarks with Params', () => {
+      it('should Get bookmarks with Params', () => {
+        return pactum
+          .spec()
+          .name('Get Bookmarks with Params')
+          .get('/bookmarks')
+          .withQueryParams('page', '1')
+          .withQueryParams('limit', '2')
+          .withHeaders({
+            Authorization: 'Bearer $S{userAt}',
+          })
+          .expectStatus(200)
+          .expectJsonLength(2);
+      });
+    });
+
     describe('Get Bookmark by id', () => {
       it('should Get bookmark by id', () => {
         return pactum
@@ -214,16 +250,6 @@ describe('App e2e', () => {
             Authorization: 'Bearer $S{userAt}',
           })
           .expectStatus(204);
-      });
-      it('should Get empty bookmarks', () => {
-        return pactum
-          .spec()
-          .get('/bookmarks')
-          .withHeaders({
-            Authorization: 'Bearer $S{userAt}',
-          })
-          .expectStatus(200)
-          .expectJsonLength(0);
       });
     });
   });

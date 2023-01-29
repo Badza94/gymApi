@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { Order } from '../enums';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookmarkDto, EditBookmarkDto } from './dto';
 
 @Injectable()
@@ -10,17 +11,18 @@ export class BookmarkService {
     params: {
       page?: number;
       limit?: number;
-      order?: 'asc' | 'desc';
+      order?: Order.ASC | Order.DESC;
     },
   ) {
     const { page, limit, order } = params;
 
-    const skip =
-      page !== undefined && limit !== undefined ? (page - 1) * limit : 0;
-    const orderBy = order !== undefined ? order : 'asc';
+    const skip = page && limit ? (page - 1) * limit : 0;
+    const take = limit ? limit : 10;
+    const orderBy = order ? order : Order.ASC;
+
     return this.prisma.bookmark.findMany({
       skip,
-      take: limit,
+      take,
       where: {
         userId,
       },

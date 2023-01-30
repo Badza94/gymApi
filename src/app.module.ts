@@ -8,7 +8,7 @@ import { BookmarkController } from './bookmark/bookmark.controller';
 import { BookmarkService } from './bookmark/bookmark.service';
 import { BookmarkModule } from './bookmark/bookmark.module';
 import { APP_GUARD } from '@nestjs/core';
-import { AccessTokenGuard } from './auth/guard';
+import { AccessTokenGuard, RolesGuard } from './auth/guard';
 
 @Module({
   imports: [
@@ -23,6 +23,10 @@ import { AccessTokenGuard } from './auth/guard';
     {
       provide: APP_GUARD,
       useClass: AccessTokenGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
     BookmarkService,
   ],

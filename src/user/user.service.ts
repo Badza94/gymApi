@@ -20,4 +20,16 @@ export class UserService {
 
     return user;
   }
+
+  async findOneById(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    delete user.hashedPassword;
+
+    return user;
+  }
 }

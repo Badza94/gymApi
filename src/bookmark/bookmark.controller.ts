@@ -14,11 +14,13 @@ import {
 } from '@nestjs/common';
 import { Order } from '../enums';
 import { GetUserProp } from '../auth/decorator';
-import { AccessTokenGuard } from '../auth/guard';
+import { AccessTokenGuard, RolesGuard } from '../auth/guard';
 import { BookmarkService } from './bookmark.service';
 import { CreateBookmarkDto, EditBookmarkDto } from './dto';
+import { Roles } from 'src/user/decorator/roles.decorator';
 
 @UseGuards(AccessTokenGuard)
+@Roles('admin')
 @Controller('bookmarks')
 export class BookmarkController {
   constructor(private bookmarkService: BookmarkService) {}

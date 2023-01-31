@@ -10,9 +10,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
+enum RoleEnum {
   ADMIN
   USER
+  GUEST
 }
 
 model User {
@@ -24,12 +25,19 @@ model User {
   hashedPassword String
   firstName      String?
   lastName       String?
-  role           Role    @default(USER)
+  role           Role[]
 
   refreshToken String?
   bookmarks    Bookmark[]
 
   @@map("users")
+}
+
+model Role {
+  id     Int      @id @default(autoincrement())
+  name   RoleEnum
+  user   User     @relation(fields: [userId], references: [id])
+  userId Int
 }
 
 model Bookmark {

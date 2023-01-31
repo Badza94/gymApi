@@ -4,6 +4,6 @@ export enum Order {
 }
 
 export enum Role {
-  ADMIN = 'admin',
-  CUSTOMER = 'customer',
+  ADMIN = 'ADMIN',
+  USER = 'USER',
 }

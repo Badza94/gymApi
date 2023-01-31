@@ -16,10 +16,10 @@ export class RefreshTokenJwtStrategy extends PassportStrategy(
     });
   }
 
-  async validate(payload: { sub: number; email: string }) {
+  async validate(payload: { userId: number }) {
     const user = await this.prisma.user.findUnique({
       where: {
-        id: payload.sub,
+        id: payload.userId,
       },
     });
     if (!user) {

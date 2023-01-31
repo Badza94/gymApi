@@ -5,6 +5,8 @@ import * as argon from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { Role } from '../enums';
+import { UserWithRole } from '../user/user.type';
 
 export interface ITokens {
   access_token: string;
@@ -24,15 +26,31 @@ export class AuthService {
       const hash = await argon.hash(dto.password);
 
       // save the new user in the db
-      const user = await this.prisma.user.create({
+      const user = (await this.prisma.user.create({
         data: {
           email: dto.email,
           hashedPassword: hash,
+          role: {
+            create: {
+              name: Role.USER,
+            },
+          },
         },
-      });
+        select: {
+          id: true,
+          email: true,
+          role: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      })) as UserWithRole;
+
+      console.log('user', user);
 
       // return the saved user
-      return this.getTokens(user.id, user.email);
+      return this.getTokens(user);
     } catch (err) {
       console.log(err);
       if (err instanceof PrismaClientKnownRequestError) {
@@ -46,11 +64,22 @@ export class AuthService {
   }
   async signIn(dto: AuthDto) {
     // find the user by email
-    const user = await this.prisma.user.findUnique({
+    const user = (await this.prisma.user.findUnique({
       where: {
         email: dto.email,
       },
-    });
+      select: {
+        id: true,
+        hashedPassword: true,
+        email: true,
+        role: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    })) as UserWithRole;
+
     // if the user does not exist, throw exception
     if (!user) {
       throw new ForbiddenException('Invalid credentials');
@@ -63,7 +92,7 @@ export class AuthService {
       throw new ForbiddenException('Invalid credentials');
     }
     // return the user
-    return this.getTokens(user.id, user.email);
+    return this.getTokens(user);
   }
 
   async signOut(userId: number): Promise<boolean> {
@@ -81,11 +110,11 @@ export class AuthService {
     return true;
   }
   async refreshToken(userId: number, refreshToken: string): Promise<ITokens> {
-    const user = await this.prisma.user.findUnique({
+    const user = (await this.prisma.user.findUnique({
       where: {
         id: userId,
       },
-    });
+    })) as UserWithRole;
 
     if (!user || !user.refreshToken) {
       throw new ForbiddenException('Invalid credentials');
@@ -99,7 +128,7 @@ export class AuthService {
       throw new ForbiddenException('Invalid credentials');
     }
 
-    const tokens = await this.getTokens(user.id, user.email);
+    const tokens = await this.getTokens(user);
     await this.updateRefreshToken(user.id, tokens.refresh_token);
 
     return tokens;
@@ -117,23 +146,24 @@ export class AuthService {
     });
   }
 
-  async getTokens(userId: number, email: string): Promise<ITokens> {
-    const data = {
-      sub: userId,
-      email,
-    };
+  async getTokens(user: UserWithRole): Promise<ITokens> {
     const [access_token, refresh_token] = await Promise.all([
-      this.jwt.signAsync(data, {
+      this.jwt.signAsync(user, {
         expiresIn: '15m',
         secret: this.config.get('ACCESS_JWT_SECRET'),
       }),
-      this.jwt.signAsync(data, {
-        expiresIn: '7d',
-        secret: this.config.get('REFRESH_JWT_SECRET'),
-      }),
+      this.jwt.signAsync(
+        {
+          userId: user.id,
+        },
+        {
+          expiresIn: '7d',
+          secret: this.config.get('REFRESH_JWT_SECRET'),
+        },
+      ),
     ]);
 
-    await this.updateRefreshToken(userId, refresh_token);
+    await this.updateRefreshToken(user.id, refresh_token);
 
     return {
       access_token,

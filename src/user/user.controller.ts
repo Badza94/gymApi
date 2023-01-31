@@ -3,7 +3,9 @@ import { AccessTokenGuard } from '../auth/guard';
 import { GetUserProp } from '../auth/decorator';
 import { EditUserDto } from './dto';
 import { UserService } from './user.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('users')
 @UseGuards(AccessTokenGuard)
 @Controller('users')
 export class UserController {

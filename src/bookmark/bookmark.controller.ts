@@ -14,11 +14,13 @@ import {
 } from '@nestjs/common';
 import { Order, Role } from '../enums';
 import { GetUserProp } from '../auth/decorator';
-import { AccessTokenGuard, RolesGuard } from '../auth/guard';
+import { AccessTokenGuard } from '../auth/guard';
 import { BookmarkService } from './bookmark.service';
 import { CreateBookmarkDto, EditBookmarkDto } from './dto';
 import { Roles } from 'src/user/decorator/roles.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('bookmark')
 @UseGuards(AccessTokenGuard)
 @Roles(Role.ADMIN)
 @Controller('bookmarks')

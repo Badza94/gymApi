@@ -10,7 +10,7 @@ async function main() {
     update: {},
     create: {
       email: 'alice@prisma.io',
-      hashedPassword: hash,
+      password: hash,
     },
   });
   const bob = await prisma.user.upsert({
@@ -18,7 +18,7 @@ async function main() {
     update: {},
     create: {
       email: 'bob@prisma.io',
-      hashedPassword: hash,
+      password: hash,
     },
   });
   console.log({ alice, bob });

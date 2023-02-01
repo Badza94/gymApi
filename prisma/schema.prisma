@@ -21,11 +21,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  email          String  @unique
-  hashedPassword String
-  firstName      String?
-  lastName       String?
-  role           Role[]
+  email     String  @unique
+  password  String
+  firstName String?
+  lastName  String?
+  role      Role[]
 
   refreshToken String?
   bookmarks    Bookmark[]

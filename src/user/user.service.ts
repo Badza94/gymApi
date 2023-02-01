@@ -44,7 +44,7 @@ export class UserService {
       },
     });
 
-    delete user.hashedPassword;
+    delete user.password;
 
     return user;
   }
@@ -56,7 +56,7 @@ export class UserService {
       },
     });
 
-    delete user.hashedPassword;
+    delete user.password;
 
     return user;
   }
